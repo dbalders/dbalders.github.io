@@ -270,6 +270,7 @@
             mlbjson = data;
         }).done(function() {
             var storageArray = [];
+            var draftedArray = [];
             if (JSON.parse(localStorage.getItem("rank")) !== null) {
                 storageArray = JSON.parse(localStorage.getItem("rank"));
             }
