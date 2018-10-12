@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSSample</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+</head>
+<body>
+<a id="downloadAnchorElem"></a>
+
+<script type="text/javascript">
+    $(function() {
+        var params = {
+            // Request parameters
+        };
+      
+        $.ajax({
+            url: "https://api.fantasydata.net/v3/nfl/stats/json/FantasyPlayers?" + $.param(params),
+            beforeSend: function(xhrObj){
+                // Request headers
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key","a862b93d9e2c4a27a0353242c4b99b69");
+            },
+            type: "GET",
+            // Request body
+            data: "{body}",
+        })
+        .done(function(data) {
+            alert("success");
+            console.log(data);
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            var dlAnchorElem = document.getElementById('downloadAnchorElem');
+            dlAnchorElem.setAttribute("href",     dataStr     );
+            dlAnchorElem.setAttribute("download", "scene.json");
+            dlAnchorElem.click();
+        })
+        .fail(function() {
+            alert("error");
+        });
+    });
+</script>
+</body>
+</html>

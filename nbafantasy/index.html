@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/select/1.1.2/js/dataTables.select.min.js"></script>
+    <script type="text/javascript" src="math.min.js"></script>
+    <script>
+    (function(i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function() {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-68503719-1', 'auto');
+    ga('send', 'pageview');
+    </script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.1.2/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.1.2/css/select.dataTables.min.css">
+    <style>
+    body {
+        text-align: center;
+    }
+    
+    #add-team {
+        width: 100%;
+        margin-bottom: 25px;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+        background-color: #848484;
+        font-size: 24px;
+        color: white;
+        padding-top: 15px;
+        height: 45px;
+    }
+    
+    #add-team:hover {
+        background-color: #bcbcbc;
+    }
+    
+    h1,
+    h2 {
+        padding-top: 50px;
+    }
+    
+    .table-container {
+        margin-top: 70px;
+        padding: 0 10px;
+    }
+
+    .bright-green {
+        background-color: #95ff95 !important;
+    }
+    
+    .medium-green {
+        background-color: #b2ffb2 !important;
+    }
+    
+    .light-green {
+        background-color: #b9ffb9 !important;
+    }
+    
+    .light-red {
+        background-color: #ffdfdf !important;
+    }
+    
+    .medium-red {
+        background-color: #ffb8b8 !important;
+    }
+    
+    .bright-red {
+        background-color: #ff8282 !important;
+    }
+
+    .strikethrough td {
+        text-decoration: line-through;
+        background-color: #ff9393 !important;
+    }
+
+    .drafted td {
+        background-color: green !important;
+    }
+
+    </style>
+</head>
+
+<body>
+    <div class="table-container">
+        <table id="my-team" class="dt-table display responsive" style="width:100%">
+            <thead>
+                <td>Round</td>
+                <td>Rank</td>
+                <td>Value</td>
+                <td>Name</td>
+                <td>Team</td>
+                <td>Pos</td>
+                <td>Points</td>
+                <td>3s</td>
+                <td>Rebounds</td>
+                <td>Assists</td>
+                <td>Steals</td>
+                <td>Block</td>
+                <td>FG%</td>
+                <td>FT%</td>
+                <td>TO</td>
+            </thead>
+        </table>
+    </div>
+    <div id="strengths">
+        <table class="table" border="1" style="border-collapse: collapse;margin:auto;margin-top:25px;">
+            <tr>
+                <td>Points</td>
+                <td>3s</td>
+                <td>Rebounds</td>
+                <td>Assists</td>
+                <td>Steals</td>
+                <td>Block</td>
+                <td>FG%</td>
+                <td>FT%</td>
+                <td>TO</td>
+            </tr>
+            <tr>
+                <td id="s-6">0</td>
+                <td id="s-7">0</td>
+                <td id="s-8">0</td>
+                <td id="s-9">0</td>
+                <td id="s-10">0</td>
+                <td id="s-11">0</td>
+                <td id="s-12">0</td>
+                <td id="s-13">0</td>
+                <td id="s-14">0</td>
+            </tr>
+        </table>
+    </div>
+    <div class="table-container">
+        <table id="nba" class="dt-table display responsive" style="width:100%">
+            <thead>
+                <td>Round</td>
+                <td>Rank</td>
+                <td>Value</td>
+                <td>Name</td>
+                <td>Team</td>
+                <td>Pos</td>
+                <td>Points</td>
+                <td>3s</td>
+                <td>Rebounds</td>
+                <td>Assists</td>
+                <td>Steals</td>
+                <td>Block</td>
+                <td>FG%</td>
+                <td>FT%</td>
+                <td>TO</td>
+            </thead>
+        </table>
+    </div>
+    <script>
+    var nbaTable;
+    var nbaArray;
+    $(document).ready(function() {
+        //Begin Datatables Initializing
+        $.fn.dataTable.defaults.column.asSorting = ['desc', 'asc'];
+
+        var nbaTable = $('#nba').DataTable({
+            paging: false,
+            info: false,
+            dom: 'Bfrtip',
+            select: 'single',
+            // order: [
+            //     [1, "desc"]
+            // ],
+            aaSorting: [
+                [1, 'asc']
+            ],
+            columnDefs: [{
+                type: "num",
+                targets: [0, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+            }, {
+                // orderSequence: ["asc"],
+                // targets: 6
+            }],
+            language: {
+                emptyTable: "Loading...",
+                search: "Filter:"
+            },
+            buttons: [{
+                text: 'Add to Team',
+                action: function(e, dt, node, config) {
+                    addToTeam();
+                }
+            }, {
+                extend: 'selected',
+                text: 'Drafted',
+                action: function(e, dt, node, config) {
+                    addToLocalStorage(nbaTable.row('.selected').data()[1], 'drafted')
+                    $('.selected').addClass('strikethrough');
+                    nbaTable.rows().deselect();
+                }
+            }, {
+                extend: 'selected',
+                text: 'Not Drafted',
+                action: function(e, dt, node, config) {
+                    removeFromLocalStorage(nbaTable.row('.selected').data()[1], 'drafted');
+                    $('.selected').removeClass('strikethrough');
+                    $('.selected').removeClass('drafted');
+                    nbaTable.rows().deselect();
+                }
+            }]
+
+        });
+
+        var myteamTable = $('#my-team').DataTable({
+            paging: false,
+            info: false,
+            dom: 'Bfrtip',
+            select: true,
+            // order: [
+            //     [1, "desc"]
+            // ],
+            aaSorting: [
+                [1, 'asc']
+            ],
+            columnDefs: [{
+                type: "num",
+                targets: [0, 1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+            }, {
+                // orderSequence: ["asc"],
+                // targets: 6
+            }],
+            language: {
+                search: "Filter:"
+            },
+            buttons: [{
+                text: 'Remove from Team',
+                action: function(e, dt, node, config) {
+                    removeFromTeam();
+                }
+            }]
+
+        });
+        //End Datatables
+
+        var nbaJson;
+
+        //Grab the data.json file
+        $.getJSON('data.json', function(data) {
+            nbaJson = data;
+        }).done(function() {
+            var storageArray = [];
+            var draftedArray = [];
+            if (JSON.parse(localStorage.getItem("rank")) !== null) {
+                storageArray = JSON.parse(localStorage.getItem("rank"));
+            }
+            if (JSON.parse(localStorage.getItem("drafted")) !== null) {
+                draftedArray = JSON.parse(localStorage.getItem("drafted"));
+            }
+
+            for (var i = 0; i < nbaJson.length; i++) {
+
+                rowNode = nbaTable.row.add([
+                    nbaJson[i]['Round'],
+                    nbaJson[i]['Rank'],
+                    nbaJson[i]['Value'].toFixed(2),
+                    nbaJson[i]['Name'],
+                    nbaJson[i]['Team'],
+                    nbaJson[i]['Pos'],
+                    nbaJson[i]['pV'].toFixed(2),
+                    nbaJson[i]['3V'].toFixed(2),
+                    nbaJson[i]['rV'].toFixed(2),
+                    nbaJson[i]['aV'].toFixed(2),
+                    nbaJson[i]['sV'].toFixed(2),
+                    nbaJson[i]['bV'].toFixed(2),
+                    nbaJson[i]['fg%V'].toFixed(2),
+                    nbaJson[i]['ft%V'].toFixed(2),
+                    nbaJson[i]['toV'].toFixed(2)
+                ]).draw().node();
+
+                if (storageArray.indexOf(i + 1) > -1) {
+                    myteamTable.row.add([
+                        nbaJson[i]['Round'],
+                        nbaJson[i]['Rank'],
+                        nbaJson[i]['Value'].toFixed(2),
+                        nbaJson[i]['Name'],
+                        nbaJson[i]['Team'],
+                        nbaJson[i]['Pos'],
+                        nbaJson[i]['pV'].toFixed(2),
+                        nbaJson[i]['3V'].toFixed(2),
+                        nbaJson[i]['rV'].toFixed(2),
+                        nbaJson[i]['aV'].toFixed(2),
+                        nbaJson[i]['sV'].toFixed(2),
+                        nbaJson[i]['bV'].toFixed(2),
+                        nbaJson[i]['fg%V'].toFixed(2),
+                        nbaJson[i]['ft%V'].toFixed(2),
+                        nbaJson[i]['toV'].toFixed(2)
+                    ]).draw();
+
+                    var tableRows = myteamTable.rows().count();
+                    $('#s-6').text(((Number($('#s-6').text()) * (tableRows -1) + Number(nbaJson[i]['pV']))/tableRows).toFixed(2));
+                    $('#s-7').text(((Number($('#s-7').text()) * (tableRows -1) + Number(nbaJson[i]['3V']))/tableRows).toFixed(2));
+                    $('#s-8').text(((Number($('#s-8').text()) * (tableRows -1) + Number(nbaJson[i]['rV']))/tableRows).toFixed(2));
+                    $('#s-9').text(((Number($('#s-9').text()) * (tableRows -1) + Number(nbaJson[i]['aV']))/tableRows).toFixed(2));
+                    $('#s-10').text(((Number($('#s-10').text()) * (tableRows -1) + Number(nbaJson[i]['sV']))/tableRows).toFixed(2));
+                    $('#s-11').text(((Number($('#s-11').text()) * (tableRows -1) + Number(nbaJson[i]['bV']))/tableRows).toFixed(2));
+                    $('#s-12').text(((Number($('#s-12').text()) * (tableRows -1) + Number(nbaJson[i]['fg%V']))/tableRows).toFixed(2));
+                    $('#s-13').text(((Number($('#s-13').text()) * (tableRows -1) + Number(nbaJson[i]['ft%V']))/tableRows).toFixed(2));
+                    $('#s-14').text(((Number($('#s-14').text()) * (tableRows -1) + Number(nbaJson[i]['toV']))/tableRows).toFixed(2));
+
+                    console.log(rowNode)
+
+                    $(rowNode).addClass('drafted')
+                }
+
+                if (draftedArray.indexOf(i + 1) > -1) {
+                    $(rowNode).addClass('strikethrough')
+                }
+                
+            }
+        }).done(function() {
+            // $('#nba tbody').on('click', 'tr', function() {
+            //     if ($(this).hasClass('selected')) {
+            //         $(this).removeClass('selected');
+            //     } else {
+            //         nbaTable.$('tr.selected').removeClass('selected');
+            //         $(this).addClass('selected');
+            //     }
+            // });
+        });
+
+        function addToTeam() {
+            myteamTable.row.add(nbaTable.row('.selected').data()).draw();
+            var tableRows = myteamTable.rows().count();
+
+            $('#s-6').text(((Number($('#s-6').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[6]))/tableRows).toFixed(2));
+            $('#s-7').text(((Number($('#s-7').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[7]))/tableRows).toFixed(2));
+            $('#s-8').text(((Number($('#s-8').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[8]))/tableRows).toFixed(2));
+            $('#s-9').text(((Number($('#s-9').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[9]))/tableRows).toFixed(2));
+            $('#s-10').text(((Number($('#s-10').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[10]))/tableRows).toFixed(2));
+            $('#s-11').text(((Number($('#s-11').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[11]))/tableRows).toFixed(2));
+            $('#s-12').text(((Number($('#s-12').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[12]))/tableRows).toFixed(2));
+            $('#s-13').text(((Number($('#s-13').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[13]))/tableRows).toFixed(2));
+            $('#s-14').text(((Number($('#s-14').text()) * (tableRows -1) + Number(nbaTable.row('.selected').data()[14]))/tableRows).toFixed(2));
+
+            colorTableCells(myteamTable);
+
+            console.log(nbaTable.row('.selected').data())
+
+            addToLocalStorage(nbaTable.row('.selected').data()[1], 'rank');
+
+            colorStrengthsTable();
+
+            $('.selected').addClass('drafted');
+
+            // nbaTable.row('.selected').remove().draw(false);
+
+        }
+
+        function removeFromTeam() {
+
+            // nbaTable.row.add(myteamTable.row('.selected').data()).draw();
+            // colorTableCells(mlbTable);
+
+            $('#s-6').text((Number($('#s-6').text()) - Number(myteamTable.row('.selected').data()[6])).toFixed(2));
+            $('#s-7').text((Number($('#s-7').text()) - Number(myteamTable.row('.selected').data()[7])).toFixed(2));
+            $('#s-8').text((Number($('#s-8').text()) - Number(myteamTable.row('.selected').data()[8])).toFixed(2));
+            $('#s-9').text((Number($('#s-9').text()) - Number(myteamTable.row('.selected').data()[9])).toFixed(2));
+            $('#s-10').text((Number($('#s-10').text()) - Number(myteamTable.row('.selected').data()[10])).toFixed(2));
+            $('#s-11').text((Number($('#s-11').text()) - Number(myteamTable.row('.selected').data()[11])).toFixed(2));
+            $('#s-12').text((Number($('#s-12').text()) - Number(myteamTable.row('.selected').data()[12])).toFixed(2));
+            $('#s-13').text((Number($('#s-13').text()) - Number(myteamTable.row('.selected').data()[13])).toFixed(2));
+            $('#s-14').text((Number($('#s-14').text()) - Number(myteamTable.row('.selected').data()[14])).toFixed(2));
+
+            removeFromLocalStorage(myteamTable.row('.selected').data()[1], 'rank');
+
+            colorStrengthsTable();
+            // colorTableCells(mlbTable);
+
+            myteamTable.row('.selected').remove().draw(false);
+        }
+
+        function colorTableCells(table) {
+            table.cells().every(function(row, column) {
+                if (Number(column) === 2 || column > 5) {
+                    if (this.data() > 2) {
+                        $(this.node()).addClass('bright-green');
+                    }
+                    if (this.data() > 1 && this.data() < 2) {
+                        $(this.node()).addClass('medium-green');
+                    }
+                    if (this.data() > 0.5 && this.data() < 1) {
+                        $(this.node()).addClass('light-green');
+                    }
+                    if (this.data() < 0 && this.data() > -1) {
+                        $(this.node()).addClass('light-red');
+                    }
+                    if (this.data() < -1 && this.data() > -2) {
+                        $(this.node()).addClass('medium-red');
+                    }
+                    if (this.data() < -2) {
+                        $(this.node()).addClass('bright-red');
+                    }
+                }
+            });
+        }
+
+        function addToLocalStorage(rankNumber, name) {
+            var storageArray = [];
+            if (JSON.parse(localStorage.getItem(name)) !== null) {
+                storageArray = JSON.parse(localStorage.getItem(name));
+            }
+
+            storageArray.push(rankNumber);
+            localStorage.setItem(name, JSON.stringify(storageArray));
+        }
+
+        function removeFromLocalStorage(rankNumber, name) {
+            var storageArray = [];
+            if (JSON.parse(localStorage.getItem(name)) !== null) {
+                storageArray = JSON.parse(localStorage.getItem(name));
+            }
+
+            var itemToRemove = storageArray.indexOf(rankNumber);
+
+            if (itemToRemove > -1) {
+                storageArray.splice(itemToRemove, 1);
+                localStorage.setItem(name, JSON.stringify(storageArray));
+            }
+        }
+
+        function colorStrengthsTable() {
+            $("#s-6").removeClass();
+            $("#s-7").removeClass();
+            $("#s-8").removeClass();
+            $("#s-9").removeClass();
+            $("#s-10").removeClass();
+            $("#s-11").removeClass();
+            $("#s-12").removeClass();
+            $("#s-13").removeClass();
+            $("#s-14").removeClass();
+
+            setClasses($('#s-6'));
+            setClasses($('#s-7'));
+            setClasses($('#s-8'));
+            setClasses($('#s-9'));
+            setClasses($('#s-10'));
+            setClasses($('#s-11'));
+            setClasses($('#s-12'));
+            setClasses($('#s-13'));
+            setClasses($('#s-14'));
+        }
+
+        function setClasses(cell) {
+            if (cell.text() > 2) {
+                cell.addClass('bright-green');
+            }
+            if (cell.text() > 1 && cell.text() < 2) {
+                cell.addClass('medium-green');
+            }
+            if (cell.text() > 0.5 && cell.text() < 1) {
+                cell.addClass('light-green');
+            }
+            if (cell.text() < 0 && cell.text() > -1) {
+                cell.addClass('light-red');
+            }
+            if (cell.text() < -1 && cell.text() > -2) {
+                cell.addClass('medium-red');
+            }
+            if (cell.text() < -2) {
+                cell.addClass('bright-red');
+            }
+        }
+    });
+    </script>
+</body>
+
+</html>
